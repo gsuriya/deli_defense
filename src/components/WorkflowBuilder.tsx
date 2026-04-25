@@ -1022,6 +1022,695 @@ function WorkflowBuilderInner({
         </Card>
       </div>
     )}
+
+      {/* Gmail Configuration Modal */}
+      {showGmailConfig && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]"
+          onClick={() => setShowGmailConfig(false)}
+        >
+          <Card 
+            className="w-[450px] max-h-[80vh] overflow-y-auto border-blue-500/30 bg-slate-900/95 backdrop-blur-xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CardHeader className="border-b border-blue-500/20 pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Mail className="h-4 w-4 text-blue-400" />
+                  Configure Gmail
+                </CardTitle>
+                <button
+                  onClick={() => setShowGmailConfig(false)}
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3 pt-4 pb-4">
+              {/* OAuth Section */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Authentication</label>
+                {gmailConfig.authenticated ? (
+                  <div className="flex gap-2">
+                    <div className="flex-1 px-3 py-2 bg-green-500/10 border border-green-500/30 rounded text-green-400 text-sm text-center">
+                      ✓ Connected to Gmail
+                    </div>
+                    <Button onClick={handleGmailAuth} variant="ghost" size="sm" className="px-3" title="Re-authenticate (e.g. after backend restart)">
+                      Reconnect
+                    </Button>
+                  </div>
+                ) : (
+                  <Button onClick={handleGmailAuth} className="w-full" size="sm">
+                    <Mail className="h-3.5 w-3.5 mr-2" />
+                    Sign in with Google
+                  </Button>
+                )}
+              </div>
+
+              {/* Email Configuration */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Recipient Email</label>
+                <input
+                  type="email"
+                  value={gmailConfig.to}
+                  onChange={(e) => setGmailConfig({ ...gmailConfig, to: e.target.value })}
+                  placeholder="recipient@example.com"
+                  className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Subject</label>
+                <input
+                  type="text"
+                  value={gmailConfig.subject}
+                  onChange={(e) => setGmailConfig({ ...gmailConfig, subject: e.target.value })}
+                  placeholder="Alert: {{event_type}}"
+                  className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Message Body</label>
+                <textarea
+                  value={gmailConfig.body}
+                  onChange={(e) => setGmailConfig({ ...gmailConfig, body: e.target.value })}
+                  placeholder="Event detected: {{event_description}}"
+                  rows={3}
+                  className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button 
+                  onClick={saveGmailConfig} 
+                  className="flex-1" 
+                  size="sm"
+                  disabled={!gmailConfig.authenticated || !gmailConfig.to}
+                >
+                  Save
+                </Button>
+                <Button 
+                  onClick={() => setShowGmailConfig(false)} 
+                  variant="ghost" 
+                  className="flex-1"
+                  size="sm"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+    {/* SMS Configuration Modal */}
+    {showSmsConfig && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]"
+        onClick={() => setShowSmsConfig(false)}
+        >
+          <Card 
+          className="w-[450px] max-h-[80vh] overflow-y-auto border-purple-500/30 bg-slate-900/95 backdrop-blur-xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+          <CardHeader className="border-b border-purple-500/20 pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-base">
+                <MessageCircle className="h-4 w-4 text-purple-400" />
+                Configure SMS
+                </CardTitle>
+                <button
+                onClick={() => setShowSmsConfig(false)}
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </CardHeader>
+          <CardContent className="space-y-3 pt-4 pb-4">
+            {/* Phone Number */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Phone Number</label>
+              <input
+                type="tel"
+                value={smsConfig.to}
+                onChange={(e) => setSmsConfig({ ...smsConfig, to: e.target.value })}
+                placeholder="+1234567890"
+                className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+              />
+              <p className="text-xs text-slate-400">Include country code (e.g., +1 for US)</p>
+            </div>
+
+            {/* Message Body */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Message</label>
+                <textarea
+                value={smsConfig.body}
+                onChange={(e) => setSmsConfig({ ...smsConfig, body: e.target.value })}
+                placeholder="Alert: {{event_type}} detected at {{timestamp}}"
+                  rows={4}
+                className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                />
+                <p className="text-xs text-slate-400">
+                Variables: <code className="text-xs bg-slate-800 px-1 py-0.5 rounded">{'{{event_type}}'}</code> <code className="text-xs bg-slate-800 px-1 py-0.5 rounded">{'{{event_description}}'}</code>
+              </p>
+              </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button 
+                onClick={saveSmsConfig} 
+                className="flex-1" 
+                size="sm"
+                disabled={!smsConfig.to || !smsConfig.body}
+              >
+                Save
+              </Button>
+              <Button 
+                onClick={() => setShowSmsConfig(false)} 
+                variant="ghost" 
+                className="flex-1"
+                size="sm"
+              >
+                Cancel
+              </Button>
+                </div>
+          </CardContent>
+        </Card>
+      </div>
+    )}
+
+    {/* VAPI Call Configuration Modal */}
+    {showVapiConfig && (
+      <div 
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]"
+        onClick={() => setShowVapiConfig(false)}
+      >
+        <Card 
+          className="w-[450px] max-h-[80vh] overflow-y-auto border-purple-500/30 bg-slate-900/95 backdrop-blur-xl shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <CardHeader className="border-b border-purple-500/20 pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Phone className="h-4 w-4 text-purple-400" />
+                Configure Voice Call
+              </CardTitle>
+              <button
+                onClick={() => setShowVapiConfig(false)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-4 pb-4">
+            {/* Phone Number */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Phone Number to Call</label>
+              <input
+                type="tel"
+                value={vapiConfig.phoneNumber}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/[^\d+]/g, ''); // Only digits and +
+                  // Auto-add +1 if user starts typing without +
+                  if (value && !value.startsWith('+')) {
+                    value = '+1' + value;
+                  }
+                  setVapiConfig({ ...vapiConfig, phoneNumber: value });
+                }}
+                placeholder="+19255772134"
+                className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+              />
+              <p className="text-xs text-slate-400">
+                {vapiConfig.phoneNumber && !vapiConfig.phoneNumber.startsWith('+') ? 
+                  <span className="text-red-400">⚠️ Must include country code (e.g., +1 for US)</span> :
+                  <span>Format: +19255772134</span>
+                }
+              </p>
+            </div>
+
+            {/* Message */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Message to Speak</label>
+                <textarea
+                value={vapiConfig.message}
+                onChange={(e) => setVapiConfig({ ...vapiConfig, message: e.target.value })}
+                placeholder="Alert: {{event_type}} detected at {{timestamp}}. Please check your surveillance system."
+                rows={3}
+                className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 resize-none"
+              />
+              <p className="text-xs text-slate-400">
+                Variables: <code className="text-xs bg-slate-800 px-1 py-0.5 rounded">{'{{event_type}}'}</code> <code className="text-xs bg-slate-800 px-1 py-0.5 rounded">{'{{event_description}}'}</code>
+              </p>
+              </div>
+
+            {/* Voice Selection */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Voice</label>
+              <select
+                value={vapiConfig.voiceId}
+                onChange={(e) => setVapiConfig({ ...vapiConfig, voiceId: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+              >
+                {availableVoices && availableVoices.length > 0 ? (
+                  availableVoices.map((voice) => (
+                    <option key={voice.id} value={voice.id} className="bg-slate-900">
+                      {voice.name}
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value="rachel" className="bg-slate-900">Rachel (Female) - Loading...</option>
+                    <option value="domi" className="bg-slate-900">Domi (Female)</option>
+                    <option value="bella" className="bg-slate-900">Bella (Female)</option>
+                    <option value="antoni" className="bg-slate-900">Antoni (Male)</option>
+                    <option value="josh" className="bg-slate-900">Josh (Male)</option>
+                  </>
+                )}
+              </select>
+              <p className="text-xs text-slate-400">Select the voice for the call</p>
+                </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button 
+                onClick={() => {
+                  setNodes((nds) =>
+                    nds.map((node) =>
+                      node.id === vapiConfigNodeId
+                        ? { ...node, data: { ...node.data, config: vapiConfig } }
+                        : node
+                    )
+                  );
+                  setShowVapiConfig(false);
+                }} 
+                className="flex-1" 
+                size="sm"
+                disabled={!vapiConfig.phoneNumber || !vapiConfig.message}
+              >
+                Save
+              </Button>
+              <Button 
+                onClick={() => setShowVapiConfig(false)} 
+                variant="ghost" 
+                className="flex-1"
+                size="sm"
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )}
+
+    {/* Time Condition Configuration Modal */}
+    {showTimeConditionConfig && (
+      <div
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]"
+        onClick={() => setShowTimeConditionConfig(false)}
+      >
+        <Card
+          className="w-[450px] max-h-[80vh] overflow-y-auto border-yellow-500/30 bg-slate-900/95 backdrop-blur-xl shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <CardHeader className="border-b border-yellow-500/20 pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Clock className="h-4 w-4 text-yellow-400" />
+                Configure Time Condition
+              </CardTitle>
+              <button
+                onClick={() => setShowTimeConditionConfig(false)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-4 pb-4">
+            {/* Time Range */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Start Time</label>
+                <input
+                  type="time"
+                  value={timeConditionConfig.startTime}
+                  onChange={(e) => setTimeConditionConfig({ ...timeConditionConfig, startTime: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">End Time</label>
+                <input
+                  type="time"
+                  value={timeConditionConfig.endTime}
+                  onChange={(e) => setTimeConditionConfig({ ...timeConditionConfig, endTime: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                />
+              </div>
+            </div>
+
+            {/* Days of Week */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Active Days</label>
+              <div className="grid grid-cols-7 gap-2">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
+                  <button
+                    key={day}
+                    onClick={() => {
+                      const days = timeConditionConfig.daysOfWeek || [];
+                      const newDays = days.includes(index)
+                        ? days.filter(d => d !== index)
+                        : [...days, index].sort();
+                      setTimeConditionConfig({ ...timeConditionConfig, daysOfWeek: newDays });
+                    }}
+                    className={cn(
+                      "px-2 py-1.5 text-xs font-medium rounded transition-colors",
+                      (timeConditionConfig.daysOfWeek || []).includes(index)
+                        ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/40"
+                        : "bg-slate-800/50 text-slate-400 border border-slate-700 hover:border-slate-600"
+                    )}
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-slate-400">Select which days this condition is active</p>
+            </div>
+
+            {/* Enable Toggle */}
+            <div className="flex items-center justify-between p-3 bg-slate-800/50 border border-slate-700 rounded-lg">
+              <div>
+                <p className="text-sm font-medium text-slate-300">Enable Condition</p>
+                <p className="text-xs text-slate-400">Workflow will only continue if time matches</p>
+              </div>
+              <button
+                onClick={() => setTimeConditionConfig({ ...timeConditionConfig, enabled: !timeConditionConfig.enabled })}
+                className={cn(
+                  "relative w-12 h-6 rounded-full transition-colors",
+                  timeConditionConfig.enabled ? "bg-yellow-500" : "bg-slate-600"
+                )}
+              >
+                <div className={cn(
+                  "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
+                  timeConditionConfig.enabled ? "translate-x-7" : "translate-x-1"
+                )} />
+              </button>
+            </div>
+
+            {/* Example */}
+            <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+              <p className="text-xs font-medium text-yellow-400 mb-1">Example:</p>
+              <p className="text-xs text-slate-300">
+                Workflow will only execute between {timeConditionConfig.startTime} and {timeConditionConfig.endTime} on selected days
+              </p>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button 
+                onClick={saveTimeConditionConfig}
+                  className="flex-1" 
+                  size="sm"
+                >
+                  Save
+                </Button>
+                <Button 
+                onClick={() => setShowTimeConditionConfig(false)}
+                variant="ghost"
+                className="flex-1"
+                size="sm"
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )}
+
+    {/* Location Condition Configuration Modal */}
+    {showLocationConditionConfig && (
+      <div
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]"
+        onClick={() => setShowLocationConditionConfig(false)}
+      >
+        <Card
+          className="w-[450px] max-h-[80vh] overflow-y-auto border-yellow-500/30 bg-slate-900/95 backdrop-blur-xl shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <CardHeader className="border-b border-yellow-500/20 pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MapPin className="h-4 w-4 text-yellow-400" />
+                Configure Location Condition
+              </CardTitle>
+              <button
+                onClick={() => setShowLocationConditionConfig(false)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-4 pb-4">
+            {/* Location Type */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Location Type</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setLocationConditionConfig({ ...locationConditionConfig, locationType: 'zone' })}
+                  className={cn(
+                    "px-3 py-2 text-sm font-medium rounded transition-colors",
+                    locationConditionConfig.locationType === 'zone'
+                      ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/40"
+                      : "bg-slate-800/50 text-slate-400 border border-slate-700 hover:border-slate-600"
+                  )}
+                >
+                  Named Zone
+                </button>
+                <button
+                  onClick={() => setLocationConditionConfig({ ...locationConditionConfig, locationType: 'gps' })}
+                  className={cn(
+                    "px-3 py-2 text-sm font-medium rounded transition-colors",
+                    locationConditionConfig.locationType === 'gps'
+                      ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/40"
+                      : "bg-slate-800/50 text-slate-400 border border-slate-700 hover:border-slate-600"
+                  )}
+                >
+                  GPS Coordinates
+                </button>
+              </div>
+            </div>
+
+            {/* Zone Name (if zone type) */}
+            {locationConditionConfig.locationType === 'zone' && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Zone Name</label>
+                <select
+                  value={locationConditionConfig.zoneName}
+                  onChange={(e) => setLocationConditionConfig({ ...locationConditionConfig, zoneName: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                >
+                  <option value="Front Door">Front Door</option>
+                  <option value="Parking Lot">Parking Lot</option>
+                  <option value="Loading Dock">Loading Dock</option>
+                  <option value="Cash Register">Cash Register</option>
+                  <option value="Storage Room">Storage Room</option>
+                  <option value="Office">Office</option>
+                </select>
+                <p className="text-xs text-slate-400">Select a predefined location zone</p>
+              </div>
+            )}
+
+            {/* GPS Coordinates (if GPS type) */}
+            {locationConditionConfig.locationType === 'gps' && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-slate-300">Latitude</label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={locationConditionConfig.latitude}
+                      onChange={(e) => setLocationConditionConfig({ ...locationConditionConfig, latitude: parseFloat(e.target.value) || 0 })}
+                      placeholder="37.7749"
+                      className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-slate-300">Longitude</label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={locationConditionConfig.longitude}
+                      onChange={(e) => setLocationConditionConfig({ ...locationConditionConfig, longitude: parseFloat(e.target.value) || 0 })}
+                      placeholder="-122.4194"
+                      className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-slate-300">Radius (meters)</label>
+                  <input
+                    type="number"
+                    value={locationConditionConfig.radius}
+                    onChange={(e) => setLocationConditionConfig({ ...locationConditionConfig, radius: parseInt(e.target.value) || 100 })}
+                    className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white focus:outline-none focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500"
+                  />
+                  <p className="text-xs text-slate-400">Trigger within this distance from coordinates</p>
+                </div>
+              </>
+            )}
+
+            {/* Enable Toggle */}
+            <div className="flex items-center justify-between p-3 bg-slate-800/50 border border-slate-700 rounded-lg">
+              <div>
+                <p className="text-sm font-medium text-slate-300">Enable Condition</p>
+                <p className="text-xs text-slate-400">Workflow will only continue if location matches</p>
+              </div>
+              <button
+                onClick={() => setLocationConditionConfig({ ...locationConditionConfig, enabled: !locationConditionConfig.enabled })}
+                className={cn(
+                  "relative w-12 h-6 rounded-full transition-colors",
+                  locationConditionConfig.enabled ? "bg-yellow-500" : "bg-slate-600"
+                )}
+              >
+                <div className={cn(
+                  "absolute top-1 w-4 h-4 bg-white rounded-full transition-transform",
+                  locationConditionConfig.enabled ? "translate-x-7" : "translate-x-1"
+                )} />
+              </button>
+            </div>
+
+            {/* Example */}
+            <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+              <p className="text-xs font-medium text-yellow-400 mb-1">Example:</p>
+              <p className="text-xs text-slate-300">
+                {locationConditionConfig.locationType === 'zone'
+                  ? `Workflow will only execute when camera is in "${locationConditionConfig.zoneName}" zone`
+                  : `Workflow will only execute within ${locationConditionConfig.radius}m of the specified coordinates`
+                }
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button
+                onClick={saveLocationConditionConfig}
+                className="flex-1"
+                size="sm"
+              >
+                Save
+              </Button>
+              <Button
+                onClick={() => setShowLocationConditionConfig(false)}
+                variant="ghost"
+                className="flex-1"
+                size="sm"
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )}
+
+    {/* Slack Configuration Modal */}
+    {showSlackConfig && (
+      <div 
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]"
+        onClick={() => setShowSlackConfig(false)}
+      >
+        <Card 
+          className="w-[450px] max-h-[80vh] overflow-y-auto border-green-500/30 bg-slate-900/95 backdrop-blur-xl shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <CardHeader className="border-b border-green-500/20 pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <MessageCircle className="h-4 w-4 text-green-400" />
+                Configure Slack
+              </CardTitle>
+              <button
+                onClick={() => setShowSlackConfig(false)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-4 pb-4">
+            {/* Channel Configuration */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Channel</label>
+              <input
+                type="text"
+                value={slackConfig.channel}
+                onChange={(e) => setSlackConfig({ ...slackConfig, channel: e.target.value })}
+                placeholder="#all-palantir4delis or #alerts"
+                className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+              />
+            </div>
+
+            {/* Message Template */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Message Template</label>
+              <textarea
+                value={slackConfig.message}
+                onChange={(e) => setSlackConfig({ ...slackConfig, message: e.target.value })}
+                placeholder={DEFAULT_SLACK_MESSAGE}
+                rows={6}
+                className="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 resize-none"
+              />
+              <div className="text-xs text-slate-400">
+                Available variables: {'{{event_type}}'}, {'{{event_description}}'}, {'{{timestamp}}'}, {'{{confidence}}'}
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button 
+                onClick={() => {
+                  const updatedConfig = { ...slackConfig, configured: true, nodeId: slackConfigNodeId };
+                  setNodes((nds) => nds.map((node) => 
+                    node.id === slackConfigNodeId 
+                      ? { ...node, data: { ...node.data, config: updatedConfig } }
+                      : node
+                  ));
+                  setShowSlackConfig(false);
+                }} 
+                className="flex-1" 
+                size="sm"
+                disabled={!slackConfig.channel || !slackConfig.message}
+              >
+                Save Configuration
+              </Button>
+              <Button 
+                onClick={() => setShowSlackConfig(false)} 
+                  variant="ghost" 
+                  className="flex-1"
+                  size="sm"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </>
   );
 }
